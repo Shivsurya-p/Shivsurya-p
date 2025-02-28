@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Countdown Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #282c36;
+            color: white;
+            padding: 50px;
+        }
+        #countdowns {
+            margin-top: 20px;
+        }
+        .countdown-item {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Countdown to Events</h1>
+    <input type="text" id="event-name" placeholder="Event Name">
+    <input type="datetime-local" id="event-date">
+    <button onclick="addEvent()">Add Event</button>
+    <div id="countdowns"></div>
+
+    <script>
+        let events = [];
+
+        function addEvent() {
+            const name = document.getElementById("event-name").value;
+            const date = document.getElementById("event-date").value;
+            if (!name || !date) return;
+            
+            const eventObj = {
+                name,
+                date: new Date(date).getTime(),
+                id: Date.now()
+            };
+            
+            events.push(eventObj);
+            updateCountdowns();
+        }
+
+        function removeEvent(id) {
+            events = events.filter(event => event.id !== id);
+            updateCountdowns();
+        }
+
+        function updateCountdowns() {
+            const container = document.getElementById("countdowns");
+            container.innerHTML = "";
+            
+            events.forEach(event => {
+                const div = document.createElement("div");
+                div.className = "countdown-item";
+                div.setAttribute("data-id", event.id);
+                
+                const timer = setInterval(() => {
+                    const now = new Date().getTime();
+                    const timeLeft = event.date - now;
+
+                    if (timeLeft < 0) {
+                        clearInterval(timer);
+                        div.innerHTML = `${event.name}: The event has started! <button onclick="removeEvent(${event.id})">Remove</button>`;
+                    } else {
+                        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                        
+                        div.innerHTML = `${event.name}: ${days}d ${hours}h ${minutes}m ${seconds}s <button onclick="removeEvent(${event.id})">Remove</button>`;
+                    }
+                }, 1000);
+                
+                container.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
